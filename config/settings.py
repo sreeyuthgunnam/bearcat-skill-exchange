@@ -84,10 +84,28 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+postgres_required = {
+    'POSTGRES_DB': os.getenv('POSTGRES_DB', '').strip(),
+    'POSTGRES_USER': os.getenv('POSTGRES_USER', '').strip(),
+    'POSTGRES_PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+}
+missing_postgres_settings = [
+    name for name, value in postgres_required.items() if not value.strip()
+]
+if missing_postgres_settings:
+    raise ImproperlyConfigured(
+        'Set the following required PostgreSQL environment variables: '
+        f"{', '.join(missing_postgres_settings)}."
+    )
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': postgres_required['POSTGRES_DB'],
+        'USER': postgres_required['POSTGRES_USER'],
+        'PASSWORD': postgres_required['POSTGRES_PASSWORD'],
+        'HOST': os.getenv('POSTGRES_HOST', 'localhost').strip() or 'localhost',
+        'PORT': os.getenv('POSTGRES_PORT', '5432').strip() or '5432',
     }
 }
 
