@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
+from django.urls import reverse
 
 from .models import Listing
 
@@ -71,3 +72,61 @@ class ListingModelTests(TestCase):
 
         self.assertSetEqual(public_ids, {visible.pk})
         self.assertNotIn(pending.pk, public_ids)
+
+
+class ListingSubmissionTests(TestCase):
+    def valid_submission(self):
+        return {
+            'display_name': 'Test Student',
+            'offered_skill': Listing.OfferedSkill.CODING,
+            'offer_description': 'I can help debug a small project.',
+            'wanted_help': 'I would like help reviewing a résumé.',
+            'availability': 'Weekday afternoons',
+            'contact_email': 'student@example.com',
+            'public_email_acknowledgment': 'on',
+        }
+
+    def test_get_displays_submission_form_and_public_email_acknowledgment(self):
+        response = self.client.get(reverse('listings:submit'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'public_email_acknowledgment')
+        self.assertContains(response, 'contact email will be public')
+
+    def test_valid_submission_is_pending_and_redirects_to_confirmation(self):
+        data = self.valid_submission()
+        data.update({
+            'status': Listing.Status.APPROVED,
+            'created_at': '2000-01-01T00:00:00Z',
+            'expires_at': '2000-01-02T00:00:00Z',
+        })
+
+        response = self.client.post(reverse('listings:submit'), data)
+
+        self.assertRedirects(response, reverse('listings:submitted'))
+        listing = Listing.objects.get()
+        self.assertEqual(listing.status, Listing.Status.PENDING)
+        self.assertNotEqual(listing.created_at.year, 2000)
+        self.assertEqual(listing.expires_at - listing.created_at, timedelta(days=14))
+
+        confirmation = self.client.get(response.url)
+        self.assertContains(confirmation, 'Received for review')
+
+    def test_invalid_submission_is_not_saved_and_displays_errors(self):
+        data = self.valid_submission()
+        data.update({
+            'display_name': 'A',
+            'offer_description': 'Too short',
+            'wanted_help': 'Too short',
+            'contact_email': 'not-an-email',
+        })
+        del data['public_email_acknowledgment']
+
+        response = self.client.post(reverse('listings:submit'), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Listing.objects.count(), 0)
+        self.assertSetEqual(
+            set(response.context['form'].errors),
+            {'display_name', 'offer_description', 'wanted_help', 'contact_email', 'public_email_acknowledgment'},
+        )
