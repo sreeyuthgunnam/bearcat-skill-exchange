@@ -1,27 +1,41 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Post a listing | Bearcat Skill Exchange</title>
-</head>
-<body>
-    <main>
-        <h1>Post a listing</h1>
-        <p>Your listing will be reviewed before it appears publicly. If approved, your contact email will be visible to visitors.</p>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.non_field_errors }}
-            {% for field in form %}
-                <div>
-                    {{ field.label_tag }}
-                    {{ field }}
-                    {% if field.help_text %}<p>{{ field.help_text }}</p>{% endif %}
-                    {% for error in field.errors %}<p role="alert">{{ error }}</p>{% endfor %}
+{% extends 'listings/base.html' %}
+
+{% block title %}Post a listing | Bearcat Skill Exchange{% endblock %}
+
+{% block content %}
+    <div class="content-layout">
+        <header class="page-heading">
+            <p class="eyebrow">Share what you know</p>
+            <h1>Post a listing</h1>
+            <p class="page-intro">Offer a skill, ask for a little help in return, and start a useful exchange with another Bearcat.</p>
+        </header>
+
+        <aside class="review-note">
+            <span class="review-note__label">Before you post</span>
+            <p>Your listing will be reviewed before it appears publicly. If approved, your contact email will be visible to visitors.</p>
+        </aside>
+
+        <section class="form-panel" aria-label="Listing details">
+            <form method="post" class="submission-form">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <div class="form-grid">
+                    {% for field in form %}
+                        <div class="form-field{% if field.errors %} form-field--error{% endif %}{% if field.name == 'offer_description' or field.name == 'wanted_help' or field.name == 'availability' %} form-field--wide{% endif %}{% if field.field.widget.input_type == 'checkbox' %} form-field--check{% endif %}">
+                            {% if field.field.widget.input_type == 'checkbox' %}
+                                {{ field }}
+                                {{ field.label_tag }}
+                            {% else %}
+                                {{ field.label_tag }}
+                                {{ field }}
+                            {% endif %}
+                            {% if field.help_text %}<p class="field-help">{{ field.help_text }}</p>{% endif %}
+                            {% for error in field.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
+                        </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
-            <button type="submit">Submit for review</button>
-        </form>
-    </main>
-</body>
-</html>
+                <button class="button button--primary" type="submit">Submit for review</button>
+            </form>
+        </section>
+    </div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#154b3b">
+    <title>{% block title %}Bearcat Skill Exchange{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'listings/site.css' %}">
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="site-header">
+        <div class="site-header__inner">
+            <a class="brand" href="{% url 'listings:submit' %}" aria-label="Bearcat Skill Exchange home">
+                <span class="brand__mark" aria-hidden="true">B</span>
+                <span class="brand__name">Bearcat <strong>Skill Exchange</strong></span>
+            </a>
+            <nav class="site-nav" aria-label="Main navigation">
+                <a class="site-nav__link" href="{% url 'listings:submit' %}">Post a listing</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main-content" class="page-shell">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="site-footer__inner">
+            <span>Bearcat Skill Exchange</span>
+            <span>Small skills. Stronger connections.</span>
+        </div>
+    </footer>
+</body>
+</html>

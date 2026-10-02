@@ -86,6 +86,11 @@ class ListingSubmissionTests(TestCase):
             'public_email_acknowledgment': 'on',
         }
 
+    def test_root_redirects_to_submission_form(self):
+        response = self.client.get('/')
+
+        self.assertRedirects(response, reverse('listings:submit'))
+
     def test_get_displays_submission_form_and_public_email_acknowledgment(self):
         response = self.client.get(reverse('listings:submit'))
 

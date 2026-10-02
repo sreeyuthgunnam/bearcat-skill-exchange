@@ -1,14 +1,12 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Received for review | Bearcat Skill Exchange</title>
-</head>
-<body>
-    <main>
-        <h1>Received for review</h1>
+{% extends 'listings/base.html' %}
+
+{% block title %}Received for review | Bearcat Skill Exchange{% endblock %}
+
+{% block content %}
+    <section class="confirmation-panel" aria-labelledby="confirmation-title">
+        <p class="eyebrow">Submission received</p>
+        <h1 id="confirmation-title">Received for review</h1>
         <p>Your listing has been received and will be reviewed before it can appear publicly.</p>
-    </main>
-</body>
-</html>
+        <a class="button button--secondary" href="{% url 'listings:submit' %}">Post another listing</a>
+    </section>
+{% endblock %}
